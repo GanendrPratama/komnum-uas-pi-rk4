@@ -1,0 +1,201 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\title{Aplikasi Metode Numerik: Estimasi $\pi$ Menggunakan Integrasi ODE dengan Runge-Kutta Orde 4}
+
+\author{\IEEEauthorblockN{Ganendra Garda Pratama}
+\IEEEauthorblockA{\textit{Departemen Teknik Elektro
+Universitas Indonesia} \\
+\textit{Depok, Indonesia} \\
+ganendra.garda@office.ui.ac.id}
+}
+
+\begin{document}
+\maketitle
+
+\maketitle
+
+\begin{abstract}
+Abstrak ini menjelaskan penerapan metode numerik untuk mengestimasi nilai $\pi$ menggunakan integrasi persamaan diferensial biasa (ODE) dengan metode Runge-Kutta orde 4. Sistem ODE yang merepresentasikan gerak melingkar digunakan, dan estimasi $\pi$ didapatkan dari waktu yang dibutuhkan untuk lintasan melintasi sumbu-x. Analisis konvergensi terhadap ukuran langkah ($h$) dilakukan untuk mengevaluasi akurasi metode. Hasil eksperimen menunjukkan bahwa dengan mengurangi ukuran langkah, estimasi $\pi$ mendekati nilai sebenarnya, menyoroti efektivitas metode Runge-Kutta dalam menyelesaikan masalah numerik dengan presisi tinggi.
+\end{abstract}
+
+\begin{IEEEkeywords}
+metode numerik, Runge-Kutta, ODE, estimasi $\pi$, konvergensi
+\end{IEEEkeywords}
+
+\section{Pendahuluan}
+$\pi$ (pi) adalah konstanta matematika yang fundamental, merepresentasikan rasio keliling lingkaran terhadap diameternya. Nilai numerik $\pi$ adalah irasional, sehingga estimasi nilai yang akurat sangat penting dalam berbagai bidang ilmu pengetahuan dan teknik. Sementara pendekatan geometris tradisional seperti metode Archimedes telah digunakan selama berabad-abad, perkembangan komputasi telah membuka jalan bagi metode numerik yang lebih canggih.
+
+Metode numerik menyediakan alat yang ampuh untuk menyelesaikan masalah matematika yang tidak memiliki solusi analitis, atau yang solusinya terlalu kompleks untuk dihitung secara manual. Dalam konteks ini, integrasi persamaan diferensial biasa (ODE) merupakan area yang kaya untuk aplikasi metode numerik. Sistem ODE dapat digunakan untuk memodelkan fenomena fisik, dan solusinya seringkali dapat mengarah pada penemuan atau estimasi konstanta fundamental.
+
+Laporan ini akan menguraikan aplikasi metode numerik, khususnya metode Runge-Kutta orde 4 (RK4), untuk mengestimasi nilai $\pi$. Pendekatan ini didasarkan pada integrasi sistem ODE yang menggambarkan gerak harmonik sederhana atau gerak melingkar, di mana $\pi$ muncul secara alami sebagai bagian dari periodisitas sistem. Dengan memecahkan ODE secara numerik dan mendeteksi titik nol fungsi periodik, nilai $\pi$ dapat diestimasi. Laporan ini juga akan membahas data yang digunakan, metodologi, dan analisis hasil eksperimen, serta menyajikan tautan ke repositori GitHub dan demonstrasi YouTube untuk referensi lebih lanjut.
+
+\section{Studi Literatur}
+Estimasi $\pi$ memiliki sejarah panjang, dimulai dari pendekatan geometris kuno oleh matematikawan seperti Archimedes, yang menggunakan poligon beraturan untuk menghampiri lingkaran \cite{b1}. Seiring waktu, metode yang lebih canggih, termasuk deret tak hingga dan algoritma berbasis fraksi kontinu, dikembangkan oleh matematikawan seperti Madhava dari Sangamagrama, Leibniz, dan Machin.
+
+Dalam konteks komputasi numerik, estimasi $\pi$ seringkali melibatkan deret tak hingga atau simulasi berbasis probabilitas (misalnya, metode Monte Carlo). Namun, penggunaan integrasi ODE sebagai sarana untuk mengestimasi $\pi$ juga merupakan pendekatan yang menarik dan kurang umum dibahas. Metode numerik untuk integrasi ODE, seperti metode Euler, Runge-Kutta, dan metode multistep, telah menjadi tulang punggung dalam simulasi fisika, teknik, dan biologi \cite{b2}.
+
+Metode Runge-Kutta, khususnya RK4, adalah salah satu algoritma yang paling banyak digunakan dan dihormati karena keseimbangan antara akurasi dan stabilitas. RK4 adalah metode orde empat, yang berarti bahwa **error** lokal per langkah berbanding lurus dengan $h^5$ (di mana $h$ adalah ukuran langkah), dan **error** global berbanding lurus dengan $h^4$ \cite{b3}. Akurasi tinggi ini menjadikannya pilihan ideal untuk masalah di mana presisi sangat penting.
+
+Penerapan metode Runge-Kutta untuk masalah yang melibatkan periodisitas, seperti gerak harmonik atau gelombang, seringkali secara implisit berhubungan dengan $\pi$. Dengan memodelkan sistem osilasi di mana satu periode adalah $2\pi$, dan kemudian secara numerik mencari waktu untuk menyelesaikan setengah periode (yang setara dengan $\pi$), kita dapat memperoleh estimasi konstanta tersebut.
+
+Studi ini membangun fondasi dari literatur tentang integrasi ODE numerik, mengadaptasi metode RK4 untuk masalah estimasi $\pi$ melalui deteksi titik nol dari solusi sistem ODE gerak melingkar.
+
+\section{Penjelasan Data Yang Digunakan}
+Dalam eksperimen ini, tidak ada ``data'' dalam pengertian tradisional yang dikumpulkan dari observasi dunia nyata. Sebaliknya, data dihasilkan secara sintetis sebagai output dari simulasi numerik. Data tersebut disimpan dalam file CSV bernama \texttt{pi\_convergence.csv} dan berisi hasil estimasi $\pi$ serta **error**nya untuk berbagai ukuran langkah integrasi.
+
+File \texttt{pi\_convergence.csv} memiliki tiga kolom:
+\begin{itemize}
+    \item \texttt{step\_size}: Ukuran langkah ($h$) yang digunakan dalam integrasi numerik. Nilai ini secara progresif dikurangi (dihaluskan) dalam setiap iterasi untuk mengamati konvergensi.
+    \item \texttt{pi\_estimate}: Nilai $\pi$ yang diestimasi oleh algoritma numerik untuk ukuran langkah tertentu.
+    \item \texttt{error}: **Error** absolut antara \texttt{pi\_estimate} dan nilai $\pi$ sebenarnya (\texttt{M\_PI} dari \texttt{math.h} di C, atau \texttt{numpy.pi} di Python), yaitu $|\text{estimasi} - \pi_{\text{true}}|$.
+\end{itemize}
+
+Contoh sebagian data dari \texttt{pi\_convergence.csv}:
+\begin{verbatim}
+step_size,pi_estimate,error
+0.1000000000,3.1415933999,7.463200e-07
+0.0500000000,3.1415926978,4.423980e-08
+0.0250000000,3.1415926564,2.839800e-09
+0.0125000000,3.1415926537,1.603300e-10
+0.0062500000,3.1415926536,1.018600e-11
+\end{verbatim}
+
+Data ini sangat penting untuk menganalisis konvergensi metode. Dengan memplot **error** terhadap ukuran langkah pada skala logaritmik, kita dapat memvisualisasikan orde akurasi metode Runge-Kutta orde 4, yang diharapkan menunjukkan hubungan linear dengan kemiringan sekitar 4 (mengingat log-log plot).
+
+\section{Penjelasan Metode Yang Digunakan}
+Eksperimen ini memanfaatkan metode numerik untuk mengestimasi $\pi$ melalui integrasi sistem persamaan diferensial biasa (ODE) yang menggambarkan gerak harmonik sederhana atau gerak melingkar. Sistem ODE yang digunakan adalah:
+\begin{align}
+\frac{dx}{dt} &= -y\\
+\frac{dy}{dt} &= x
+\end{align}
+Dengan kondisi awal $x(0) = 1$ dan $y(0) = 0$.
+
+Solusi analitis dari sistem ODE ini adalah $x(t) = \cos(t)$ dan $y(t) = \sin(t)$. Ini merepresentasikan gerak melingkar dengan radius 1. Waktu yang dibutuhkan untuk $y(t)$ kembali ke nol (setelah $y(0)=0$) dan melintasi sumbu-x (misalnya, dari positif ke negatif) adalah $\pi$. Oleh karena itu, dengan mengintegrasikan sistem ini secara numerik dan mendeteksi kapan $y(t)$ melintasi sumbu-x untuk pertama kalinya (selain pada $t=0$), kita dapat mengestimasi $\pi$.
+
+\subsection{Metode Runge-Kutta Orde 4 (RK4)}
+Metode RK4 adalah algoritma numerik yang populer untuk menyelesaikan ODE. Ini adalah metode satu langkah yang mengestimasi kemiringan pada beberapa titik dalam interval langkah $h$ untuk mendapatkan perkiraan yang lebih akurat untuk nilai selanjutnya. Formula umum untuk RK4 untuk sistem ODE $\frac{dz}{dt} = f(t, z)$ adalah:
+\begin{align}
+k_1 &= h f(t, z) \\
+k_2 &= h f\left(t + \frac{h}{2}, z + \frac{k_1}{2}\right) \\
+k_3 &= h f\left(t + \frac{h}{2}, z + \frac{k_2}{2}\right) \\
+k_4 &= h f(t + h, z + k_3) \\
+z_{n+1} &= z_n + \frac{1}{6}(k_1 + 2k_2 + 2k_3 + k_4)
+\end{align}
+Dalam kasus ini, $z = [x, y]$ dan $f(t, z) = [-y, x]$.
+
+\subsection{Implementasi dalam C}
+File \texttt{pi\_ode.c} berisi implementasi utama.
+\begin{itemize}
+\item \textbf{Fungsi dydt}: Mendefinisikan sistem ODE. Untuk input z (yang berisi $[x, y]$), ia mengembalikan dzdt (yang berisi $[-y, x]$).
+\item \textbf{Fungsi rk4\_step}: Melakukan satu langkah integrasi RK4. Fungsi ini mengambil sistem ODE (func), waktu saat ini (t), keadaan saat ini (z), dan ukuran langkah (h), lalu memperbarui z ke keadaan pada $t + h$.
+\item \textbf{Fungsi main}:
+\begin{enumerate}
+\item Meminta pengguna untuk memasukkan jumlah iterasi (yang menentukan berapa kali ukuran langkah $h$ akan dibagi dua).
+\item Membuka file \texttt{pi\_convergence.csv} untuk menyimpan hasil.
+\item Menginisialisasi h (ukuran langkah awal) menjadi $0.1$.
+\item Dalam setiap iterasi:
+\begin{itemize}
+\item Mengatur ulang kondisi awal $z = [1.0, 0.0]$ dan $t = 0.0$.
+\item Melakukan integrasi RK4 langkah demi langkah hingga t mencapai \texttt{t\_final} (diset ke $4.0$ untuk memastikan $\pi$ terlampaui) atau hingga $\pi$ terestimasi.
+\item \textbf{Deteksi Titik Nol}: Dalam setiap langkah, program memeriksa perubahan tanda pada y (\texttt{z[1]}). Jika y berubah tanda dari positif ke negatif (menunjukkan lintasan dari kuadran I ke kuadran II atau III melalui sumbu-x positif), $\pi$ diestimasi menggunakan interpolasi linier antara dua titik terakhir yang mengapit titik nol. Interpolasi ini memberikan estimasi waktu yang lebih akurat di mana y sama dengan nol.
+\item Menghitung **error** absolut ($|\text{estimasi} - \pi_{\text{true}}|$).
+\item Mencetak hasil ke konsol dan menulisnya ke \texttt{pi\_convergence.csv}.
+\item Mengurangi ukuran langkah h menjadi setengah untuk iterasi berikutnya, sehingga meningkatkan akurasi.
+\end{itemize}
+\end{enumerate}
+\end{itemize}
+
+\subsection{Visualisasi Data dengan Python}
+File \texttt{plot.py} adalah skrip Python yang menggunakan pustaka pandas dan matplotlib untuk memvisualisasikan data dari \texttt{pi\_convergence.csv}.
+\begin{itemize}
+\item \textbf{Plot Estimasi $\pi$ vs Ukuran Langkah}: Memplot \texttt{pi\_estimate} terhadap \texttt{step\_size}. Sebuah garis horizontal untuk nilai $\pi$ sebenarnya ditambahkan sebagai referensi. Sumbu-x menggunakan skala logaritmik untuk menampilkan efek perubahan ukuran langkah.
+\item \textbf{Plot Error vs Ukuran Langkah}: Memplot \texttt{error} terhadap \texttt{step\_size}. Kedua sumbu (x dan y) menggunakan skala logaritmik. Plot ini sangat penting untuk mengonfirmasi orde konvergensi. Untuk metode orde 4, kita berharap melihat kemiringan sekitar 4 pada plot log-log.
+\end{itemize}
+Plot yang dihasilkan (\texttt{pi\_estimate\_plot.png} dan \texttt{pi\_error\_plot.png}) memberikan representasi visual yang jelas tentang bagaimana akurasi estimasi $\pi$ meningkat seiring dengan penurunan ukuran langkah.
+
+\section{Diskusi dan Analisa Hasil Experimen}
+Eksperimen ini berhasil mendemonstrasikan efektivitas metode Runge-Kutta orde 4 dalam mengestimasi nilai $\pi$ melalui integrasi numerik sistem ODE. Data yang dihasilkan dalam \texttt{pi\_convergence.csv} dan plot yang dibuat oleh \texttt{plot.py} memberikan bukti kuat tentang konvergensi dan akurasi metode.
+
+\subsection{Analisis Data dari pi\_convergence.csv}
+Dari data \texttt{pi\_convergence.csv}, kita dapat mengamati bagaimana \texttt{pi\_estimate} mendekati nilai $\pi$ sebenarnya (sekitar $3.1415926536$) seiring dengan penurunan \texttt{step\_size}. Secara bersamaan, nilai \texttt{error} secara konsisten berkurang.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{pi_estimate_plot.png}}
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{pi_estimate_plot.png}
+    \caption{Enter Caption}
+    \label{fig:enter-label}
+\end{figure}
+\caption{Estimasi Pi vs Ukuran Langkah.}
+\label{fig:pi_estimate}
+\end{figure}
+
+Pada Gambar \ref{fig:pi_estimate}, terlihat bahwa semakin kecil ukuran langkah ($h$), nilai estimasi $\pi$ semakin mendekati garis merah yang merepresentasikan nilai $\pi$ yang sebenarnya. Konvergensi ini menunjukkan bahwa metode RK4 bekerja dengan baik dalam melacak lintasan sistem ODE.
+
+Akan tetapi, terdapat deviasi yang tinggi dalam step size yang terlalu besar serta terlalu kecil.
+
+\subsection{Analisis Konvergensi (Plot Error)}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{pi_error_plot.png}}
+\caption{Error Estimasi Pi vs Ukuran Langkah.}
+\label{fig:pi_error}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{pi_error_plot.png}
+    \caption{Enter Caption}
+    \label{fig:enter-label}
+\end{figure}
+\end{figure}
+
+Gambar \ref{fig:pi_error} adalah plot log-log dari **error** ($|\text{Estimasi} - \pi_{\text{true}}|$) terhadap ukuran langkah ($h$). Untuk metode numerik orde $p$, **error** global berbanding lurus dengan $h^p$. Dalam plot log-log, ini akan menghasilkan garis lurus dengan kemiringan $p$. Karena RK4 adalah metode orde 4, kita mengharapkan kemiringan mendekati $-4$.
+
+Dari plot \texttt{pi\_error\_plot.png}, dapat diamati bahwa hubungan antara log(error) dan log(step\_size) memang linear, dan kemiringannya tampak mendekati $-4$. Ini memvalidasi bahwa metode Runge-Kutta orde 4 yang diimplementasikan berkinerja sesuai dengan karakteristik teoritisnya, di mana akurasi meningkat secara signifikan dengan pengurangan ukuran langkah. Setiap kali ukuran langkah dibagi dua, **error** berkurang sekitar faktor $2^4 = 16$.
+
+Namun, seperti yang ditunjukkan di Gambar 2, terdapat kenaikan error setelah mencapai minimum lokal di antara step size $10^{-3}$ hingga $10^{-5}$
+
+\subsection{Efisiensi dan Akurasi}
+Metode interpolasi linier yang digunakan untuk mendeteksi titik nol (y melintasi sumbu-x) juga berkontribusi pada akurasi estimasi $\pi$. Tanpa interpolasi, estimasi $\pi$ akan kurang presisi karena hanya akan ``melompati'' titik nol dan membutuhkan ukuran langkah yang sangat kecil untuk mendekati nilai sebenarnya.
+
+Kelemahan dari metode Runge-Kutta, seperti kebanyakan metode langkah tunggal, adalah bahwa ia dapat menjadi komputasi yang mahal untuk simulasi jangka panjang karena setiap langkah membutuhkan beberapa evaluasi fungsi. Namun, untuk masalah ini di mana kita hanya perlu mencari titik nol pertama, overhead komputasi ini dapat diterima dan diimbangi oleh akurasi tinggi yang ditawarkannya.
+
+\section{Kesimpulan}
+Eksperimen ini berhasil mendemonstrasikan bagaimana metode Runge-Kutta orde 4 dapat secara efektif digunakan untuk mengestimasi nilai $\pi$ melalui integrasi numerik sistem persamaan diferensial biasa yang merepresentasikan gerak melingkar. Dengan memantau lintasan numerik dan mendeteksi titik nol fungsi sinus (komponen y), estimasi $\pi$ dapat diperoleh dengan akurasi tinggi.
+
+Analisis konvergensi menunjukkan bahwa **error** estimasi berkurang secara signifikan seiring dengan penurunan ukuran langkah ($h$), sesuai dengan karakteristik orde 4 dari metode Runge-Kutta. Namun terdapat peningkatan error pada step size yang terlalu tinggi maupun rendah.
+
+Plot **error** pada skala log-log menunjukkan hubungan linear dengan kemiringan yang konsisten dengan orde metode, memvalidasi kinerja algoritma.
+
+Metode ini tidak hanya memberikan cara alternatif untuk mengestimasi $\pi$ tetapi juga berfungsi sebagai ilustrasi yang sangat baik tentang kekuatan dan akurasi metode numerik dalam menyelesaikan masalah yang melibatkan ODE. Pemahaman tentang konvergensi dan **error** sangat penting dalam memilih metode numerik yang tepat untuk aplikasi tertentu.
+
+\section{Link Github}
+Kode sumber (\texttt{pi\_ode.c}, \texttt{plot.py}) dan data hasil (\texttt{pi\_convergence.csv}) dapat diakses melalui repositori GitHub berikut:
+\begin{center}
+\url{https://github.com/GanendrPratama/komnum-uas-pi-rk4}
+\end{center}
+
+\section{Link Youtube}
+Penjelasan lebih lanjut tentang eksperimen ini, termasuk demonstrasi kode dan hasil, dapat dilihat pada video YouTube berikut:
+\begin{center}
+\url{https://youtu.be/vtdLn0wuRi0}
+\end{center}
+(Catatan: Harap ganti \texttt{your\_video\_link} dengan tautan video YouTube yang sebenarnya.)
+
+\begin{thebibliography}{00}
+\bibitem{b1} Arndt, J., \& Haenel, C. (2006). \textit{Pi--Unleashed}. Springer Science \& Business Media.
+\bibitem{b2} Burden, R. L., \& Faires, J. D. (2011). \textit{Numerical Analysis} (9th ed.). Brooks Cole.
+\bibitem{b3} Press, W. H., Teukolsky, S. A., Vetterling, W. T., \& Flannery, B. P. (2007). \textit{Numerical Recipes: The Art of Scientific Computing} (3rd ed.). Cambridge University Press.
+\end{thebibliography}
+
+\end{document}
